@@ -1,3 +1,19 @@
+/**  
+ * SMART FP7 - Search engine for MultimediA enviRonment generated contenT
+ * Webpage: http://smartfp7.eu
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
+ * The Original Code is Copyright (c) 2012-2014 the University of Glasgow
+ * All Rights Reserved
+ * 
+ * Contributor(s):
+ *  @author M-Dyaa Albakour <dyaa.albakour at glasgow.ac.uk>
+ *  @author Romain Deveaud <romain.deveaud at glasgow.ac.uk>
+ */
+
 package eu.smartfp7.foursquare;
 
 import java.util.ArrayList;
@@ -14,41 +30,25 @@ import com.google.gson.JsonParser;
 import eu.smartfp7.geo.GeoUtil;
 
 /**
- * A (FourSquare) venue as defined by the FourSquare venue. 
+ * A venue as defined by Foursquare. 
  * 
- * 
- * 
- * 
- * @author Dyaa Albakour
- */
-/**
- * @author dyaa
- *
- */
-/**
- * @author dyaa
+ * This is an example of a venue in the JSON format:
+ * {"id":"4ad08b28f964a52064d820e3",
+ *  "name":"Westfield London",
+ *  "contact":{"phone":"+442033712300","formattedPhone":"+44 20 3371 2300","twitter":"westfieldlondon"},
+ *  "location":{"address":"Ariel Way","lat":51.50721994598464,"lng":-0.2215290069580078,"distance":1943,"postalCode":"W12 7GF","city":"Shepherd's Bush","state":"Greater London","country":"United Kingdom","cc":"GB"},
+ *  "canonicalUrl":"https://foursquare.com/v/westfield-london/4ad08b28f964a52064d820e3",
+ *  "categories":[{"id":"4bf58dd8d48988d1fd941735","name":"Mall","pluralName":"Malls","shortName":"Mall","icon":{"prefix":"https://foursquare.com/img/categories_v2/shops/mall_","suffix":".png"},"primary":true}],
+ *  "verified":true,
+ *  "restricted":true,
+ *  "stats":{"checkinsCount":46003,"usersCount":19916,"tipCount":235},
+ *  "url":"http://uk.westfield.com/london/","likes":{"count":0,"groups":[]},
+ *  "hereNow":{"count":11,"groups":[{"type":"others","name":"Other people here","count":11,"items":[]}]},
+ *  "venuePage":{"id":"33156056"}}
  *
  */
 public class Venue{
-
-	
-	/*
-	 * 
-	 * This is an example of a venue in the JSON format
- * {"id":"4ad08b28f964a52064d820e3",
-"name":"Westfield London",
-"contact":{"phone":"+442033712300","formattedPhone":"+44 20 3371 2300","twitter":"westfieldlondon"},
-"location":{"address":"Ariel Way","lat":51.50721994598464,"lng":-0.2215290069580078,"distance":1943,"postalCode":"W12 7GF","city":"Shepherd's Bush","state":"Greater London","country":"United Kingdom","cc":"GB"},
-"canonicalUrl":"https://foursquare.com/v/westfield-london/4ad08b28f964a52064d820e3",
-"categories":[{"id":"4bf58dd8d48988d1fd941735","name":"Mall","pluralName":"Malls","shortName":"Mall","icon":{"prefix":"https://foursquare.com/img/categories_v2/shops/mall_","suffix":".png"},"primary":true}],
-"verified":true,
-"restricted":true,
-"stats":{"checkinsCount":46003,"usersCount":19916,"tipCount":235},
-"url":"http://uk.westfield.com/london/","likes":{"count":0,"groups":[]},
-"hereNow":{"count":11,"groups":[{"type":"others","name":"Other people here","count":11,"items":[]}]},
-"venuePage":{"id":"33156056"}}
-	 */
-	
+  
 	private String id;
 	private String name;
 	private String phone;
@@ -97,21 +97,6 @@ public class Venue{
 		
 		JsonArray jsonArray = jsonObj.get("categories").getAsJsonArray();
 		int s  =jsonArray.size();
-		/*
-		 * TODO: remove this part if everything is working fine with the new code.
-		 * 
-		String[] catIds = new String[s];
-		for(int i=0;i<s;i++){
-			catIds[i]= jsonArray.get(i).getAsJsonObject().get("id").getAsString();
-		}
-		setCategoriesIds(catIds);
-		
-		String[] catNames = new String[s];
-		for(int i=0;i<s;i++){
-			catNames[i]= jsonArray.get(i).getAsJsonObject().get("name").getAsString();
-		}
-		setCategoriesNames(catNames);
-		*/
 		
 		this.categories = new HashMap<String, String>();
 		this.category_icons = new HashMap<String,String>();
@@ -353,122 +338,6 @@ public class Venue{
 	}
 	
 	
-	/**
-	 * Convert the <i>HereNow</i> raw time series into an array of integers representing 
-	 * 	a time series on a regular interval specified 
-	 * 
-	 * @param starttime
-	 * @param endtime
-	 * @param interval 
-	 */
-	public Double[] getNormalisedHereNowTimeSeries(long starttime, 
-			long endtime, long interval) throws Exception{
-		if(starttime>= endtime)
-			throw new Exception("Invalid parameters");
-		
-		if(this.getHereNowTimeseries().size()==0)
-			return null;
-		
-		long first = this.getHereNowTimeseries().get(0).getTimeInMilis(); 
-		
-		List<Double> list= new ArrayList<Double>();
-		
-		// Number of zeros to be added until there is data 
-		// Each point of time correspond to the interval that preceded it.
-		//		Note that the first point considered corresponds to the zero index
-		/*
-		int tofill = (int) ((first - starttime)/(int)interval) +1;
-		
-		
-		for (int i=0;i<tofill;i++)	list.add(0.0);		
-		
-		long currentPoint = starttime;
-		if (tofill>1)
-			currentPoint =	starttime + (tofill-1)* interval;
-		int accumulator =0; // accumulator of the observations found
-		int observations = 0;
-		boolean exceedEndTime = false;
-		bigloop: for(TimeSeriesItem<Integer> tsi: this.getHereNowTimeseries()){
-			long ct = tsi.getTimeInMilis();
-			if( ct < currentPoint+interval  ){
-				int value = tsi.getValue();				
-				accumulator += value;
-				observations++;
-			}else{
-				
-				double v = (double)accumulator/(double)observations;
-				list.add(v);
-				accumulator = 0;
-				observations =0;				
-				currentPoint = currentPoint+ interval;
-				while(ct -currentPoint>interval){
-					list.add(0.0);
-					currentPoint += interval;
-				}
-				int value = tsi.getValue();				
-				accumulator += value;
-				observations++;
-				
-			}
-			
-			
-			if(currentPoint+interval> endtime){
-				while(currentPoint+interval> endtime){
-					currentPoint-=interval;
-				
-					list.remove(list.size()-1);
-				}
-				exceedEndTime = true;
-				break bigloop;
-			}
-			
-		}
-		
-		
-		if(!exceedEndTime){
-			
-			while(! (currentPoint+interval> endtime)){
-				currentPoint+=interval;
-					
-				list.add(0.0);
-			}
-			
-		}*/
-		long current= starttime;
-		int pointer = 0;
-		for(;current<endtime+interval; current += interval){
-			/*
-			int accumulator =0; // accumulator of the observations found
-			int observations = 0;
-			long ct =this.getHereNowTimeseries().get(pointer).getTimeInMilis();			 
-			while(ct<current+interval){
-				TimeSeriesItem<Integer> tsi = this.getHereNowTimeseries().get(pointer);
-				ct = tsi.getTimeInMilis();
-				int v = tsi.getValue();
-				accumulator+=v;
-				observations++;
-				pointer++;
-			}*/
-			List<Integer> indices = timeseriesIndeicsBetween(current, current+interval);
-			int accumulate=0;
-			int observations =0;
-			for(int x:indices){
-				accumulate+= this.getHereNowTimeseries().get(x).getValue();
-				observations++;
-			}
-			if(observations>0)
-				list.add((double)accumulate/(double)observations);
-			else
-				list.add(0.0);
-			
-		}
-		
-		
-	
-		return list.toArray(new Double[list.size()]);
-	}
-
-
 	public class HereNow{
 		int count;
 		
@@ -483,23 +352,6 @@ public class Venue{
 			return v.getId().equals(this.getId());
 		}
 		return false;
-	}
-
-	
-	
-	private List<Integer> timeseriesIndeicsBetween(long start, long end){
-		List<Integer> list = new ArrayList<Integer>();
-		for(int i=0;i<this.getHereNowTimeseries().size();i++){
-			long t = getHereNowTimeseries().get(i).getTimeInMilis();
-			 
-			if(t>=start && t< end){
-				list.add(i);
-			}
-			if(t> end) break;
-			
-		}
-		return list;
-		
 	}
 
 	public int getLikes() {

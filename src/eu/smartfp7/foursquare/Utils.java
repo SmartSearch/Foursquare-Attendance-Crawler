@@ -61,13 +61,11 @@ public class Utils {
 	return obj;
   }
   
-  
-  
   /**
    * The generic function for querying the API.
    * (could be a generic function for making any HTTP calls by the way)
    */
-  protected static String makeAPICall(String url_str) throws IOException {
+  public static String makeAPICall(String url_str) throws IOException {
 	URL url = new URL(url_str);
 	HttpURLConnection conn =
 		(HttpURLConnection) url.openConnection();

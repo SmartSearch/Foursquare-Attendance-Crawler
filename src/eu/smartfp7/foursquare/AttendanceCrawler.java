@@ -27,6 +27,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,9 +43,11 @@ import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 
@@ -54,48 +59,6 @@ import com.google.gson.JsonParser;
  */
 
 public class AttendanceCrawler {
-  
-  /**
-   * Gold Coast arguments:
-   * goldcoast
-   * /local/tr.smart/foursquare/goldcoast
-   * -28.017476
-   * 153.424478
-   * 
-   * 
-   * Amsterdam arguments:
-   * amsterdam
-   * /local/tr.smart/foursquare/amsterdam
-   * 52.367319
-   * 4.886829
-   * 
-   * 
-   * San Francisco arguments:
-   * sanfrancisco
-   * /local/tr.smart/foursquare/sanfrancisco
-   * 1)
-   * 37.76203
-   * -122.341218
-   * 2)
-   * 37.757687
-   * -122.440766
-   * 
-   * 
-   * London arguments (Twickenham to Woodford):
-   * london2
-   * /local/tr.smart/foursquare/london2
-   * 51.5116
-   * -0.115535
-   * 
-   * 
-   * Brisbane arguments:
-   * brisbane
-   * /local/tr.smart/foursquare/brisbane
-   * -27.471115
-   * 153.024002
-   * 
-   */
-
   /**
    * Map of cities and their associated time zones.
    */
@@ -140,22 +103,97 @@ public class AttendanceCrawler {
   }
   
   
+  
+  /** Settings functions */
+  
+  private static JsonObject settings_json;
+  
+  protected static void checkFileHierarchy(String city) {
+	String folder = getFolder();
+  
+	String[] dirs_to_check = {  
+								folder + city , 
+								folder + city + File.separator + "attendances_crawl", 
+								folder + city + File.separator + "log",
+								folder + city + File.separator + "foursquare_venues" 
+						 	 };
+	
+	for(String dir: dirs_to_check) {
+	  File dir_f = new File(dir);
+	  if(!dir_f.exists())
+		dir_f.mkdirs();
+	}
+  }
+  
+  protected static void loadSettings() {
+	// We load the settings file and parse its JSON only once.
+	try {
+	  JsonParser parser = new JsonParser();
+	  AttendanceCrawler.settings_json =  parser.parse(StringUtils.join(Files.readAllLines(Paths.get("etc/settings.json"), StandardCharsets.UTF_8)," ")).getAsJsonObject();
+	} catch (IOException e) {
+	  e.printStackTrace();
+	}
+  }
+  
+  /** Return the folder where all the data will be downloaded. */
+  protected static String getFolder() {
+	// If we haven't loaded it before, get the JSON of the settings.json file.
+	if(AttendanceCrawler.settings_json == null)
+	  loadSettings();	  
+	
+	String path = AttendanceCrawler.settings_json.get("crawl_folder").getAsString(); 
+	if(path.charAt(path.length()-1) != File.separatorChar)
+	    path += File.separator;
+	
+	return path;
+  }
+  
+  /** Return the Foursquare API credentials for a given city. */
+  protected static Map<String,String> getCityCredentials(String city) {
+	// If we haven't loaded it before, get the JSON of the settings.json file.
+	if(AttendanceCrawler.settings_json == null)
+	  loadSettings();
+	
+	Map<String,String> credentials = new HashMap<String,String>();
+	
+	JsonObject cred_map = AttendanceCrawler.settings_json.get("foursquare_api_accounts").getAsJsonObject().get(city).getAsJsonObject();
+	credentials.put("client_secret", cred_map.get("client_secret").getAsString());
+	credentials.put("client_id", cred_map.get("client_id").getAsString());
+	
+	return credentials;
+  }
+  
+  /** Return the timezone of a given city. */
+  protected static String getCityTimezone(String city) {
+	// If we haven't loaded it before, get the JSON of the settings.json file.
+	if(AttendanceCrawler.settings_json == null)
+	  loadSettings();
+	
+	return AttendanceCrawler.settings_json.get("timezones").getAsJsonObject().get(city).getAsString();
+  }
+  
+  
+  
+  
+ 
+  
   /**
-   * This function loads the venue IDs from the file generated when
-   * calling the `DownloadPages` program.
+   * This function loads the Foursquare IDs of the venues for a given city.
+   * TODO: See gist to find the 5000 most popular venues in a city.
    * 
-   * @param A city [london, amsterdam, sanfrancisco]
+   * @param A city.
    * @return A list of String representing the IDs of the training venues
    * @throws IOException
    */
   public static Collection<String> loadVenues(String city) throws IOException {
 	Collection<String> venues = new ArrayList<String>();
 	
-	BufferedReader city_file = new BufferedReader(new FileReader("/local/tr.smart/foursquare/"+city+"_venues/venue_url.out"));
+	String ids_file = getFolder()+ city + File.separator + "venues.ids";
+	
+	BufferedReader city_file = new BufferedReader(new FileReader(ids_file));
 	String line = null;
 	while ((line = city_file.readLine()) != null)
-	  if(!venues.contains(line.split("\t")[0]))
-	  	venues.add(line.split("\t")[0]);
+	  venues.add(line);
 	  
 	System.out.println(venues.size()+" venues loaded for "+city);
 	city_file.close();
@@ -200,31 +238,6 @@ public class AttendanceCrawler {
 	Calendar cal = Calendar.getInstance();
 	SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
 	vParam = fmt.format(cal.getTime());
-	
-	// Romain's credentials
-	// Exhaustive crawl
-	// client_id=QQG25WOEZU0R4MEGXWSLSJQJC5UI5Y4Y5YHSPN3RGLM3ULEN
-	// client_secret=1KNA5ELWCZCBUG3N1IDCYVOLWSGPIUOYY3H4HZUADE4BJPSL
-	//
-	
-	// london crawl
-	// client_id=SUIULPYP4BQ1J0EAZ3KUHSDRP1VYWNJEVVT4R0TAXPEA5PMG
-	// client_secret=LQOMTTL5G4LERJMOT0GGSK2OVKRAQI4FMKJNREEIYFUET4ND
-	
-	// amsterdam crawl
-	//
-	//EEUJP005ZF2G4KP4LLDNPYW2E5XDOMNHSPK0HQPPPWQ0IZ2M
-	//EJJIS0I3JZEY10ZOBQX4YAXTYSZDW5DMCTCQP1SWUK13INPL
-	
-	// goldcoast crawl
-	//
-	//WE0BEXSL5FUEREONSMCFMDS4KZOIMYCK4OEX4XEJMDIVP2DW
-	//M5UXKCTZLE0BNFA0UAIEANOZBJKGSFQ1BNKMJMMT5TOQXGVV
-	
-	// sanfrancisco crawl
-	//
-	//XYU1LNUBITLCECATB0AQYYPOLPOR42GIB5GT4J2RLJKI4ISE
-	//5VACF55Z1UXFTZYWREQRRVPH0RHALSUJXIIIJPGYPEXVY41I
 	
 	try {
 		url = "https://api.foursquare.com/v2/venues/"+URLEncoder.encode(venue_id,"UTF-8")
@@ -303,6 +316,7 @@ public class AttendanceCrawler {
 	return ret_val;
   }
   
+  
   /**
    * The main takes an undefined number of cities as arguments, then initializes
    * the specific crawling of all the trending venues of these cities.
@@ -313,10 +327,8 @@ public class AttendanceCrawler {
    * 
    */
   public static void main(String[] args) throws Exception{
+	String folder = getFolder();
 	
-	
-	
-	System.exit(0);
 	// We keep info and error logs, so that we know what happened in case
 	// of incoherence in the time series.
 	Map<String,FileWriter> info_logs  = new HashMap<String, FileWriter>();
@@ -349,11 +361,13 @@ public class AttendanceCrawler {
 	
 	
 	for(String c: args) {
+	  checkFileHierarchy(c);
+
 	  city_venues.put(c, loadVenues(c));
 	  total_venues += city_venues.get(c).size();
 	  
-	  info_logs.put(c,new FileWriter("/local/tr.smart/foursquare/"+c+"_specific_crawl/info.log",true));
-	  error_logs.put(c,new FileWriter("/local/tr.smart/foursquare/"+c+"_specific_crawl/error.log",true));
+	  info_logs.put (c,new FileWriter(folder + c + File.separator + "log" + File.separator + "info.log", true));
+	  error_logs.put(c,new FileWriter(folder + c + File.separator + "log" + File.separator + "error.log",true));
 	  
 	  Calendar cal = Calendar.getInstance();
 	  
@@ -365,8 +379,7 @@ public class AttendanceCrawler {
 	  // Important: the program must not be interrupted for more than one
 	  // hour, or we will lose time series data.
 	  for(String venue_id: city_venues.get(c)){
-		String ts_file = "/local/tr.smart/foursquare/"+c+"_specific_crawl/"+venue_id+".ts";
-		System.out.println(venue_id);
+		String ts_file = folder + c + File.separator + "attendances_crawl" + File.separator +venue_id+".ts";
 		
 		if(new File(ts_file).exists()) {
 		  BufferedReader buffer = new BufferedReader(new FileReader(ts_file));
