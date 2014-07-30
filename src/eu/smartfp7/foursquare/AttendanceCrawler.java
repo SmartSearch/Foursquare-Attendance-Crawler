@@ -59,48 +59,48 @@ import com.google.gson.JsonParser;
  */
 
 public class AttendanceCrawler {
-  /**
-   * Map of cities and their associated time zones.
-   */
-  private static final Map<String,String> timeZones ;
-  static {
-	timeZones = new HashMap<String,String>();
-	timeZones.put("london",       "Europe/London");
-	timeZones.put("london2",      "Europe/London");
-	timeZones.put("glasgow",      "Europe/London");
-	timeZones.put("amsterdam",    "Europe/Amsterdam");
-	timeZones.put("goldcoast", 	  "Australia/Queensland");
-	timeZones.put("sanfrancisco", "America/Los_Angeles");
-	timeZones.put("santander",    "Europe/Madrid");
-  }
-  
-  /**
-   * Maps of cities and their associated Foursquare API credentials.
-   */
-  private static final Map<String,String> clientIDs ;
-  private static final Map<String,String> clientSecrets ;
-  static {
-	clientIDs = new HashMap<String,String>();
-	clientSecrets = new HashMap<String,String>();
-	
-	clientIDs.put("london",       "SUIULPYP4BQ1J0EAZ3KUHSDRP1VYWNJEVVT4R0TAXPEA5PMG");
-	clientIDs.put("london2",      "SUIULPYP4BQ1J0EAZ3KUHSDRP1VYWNJEVVT4R0TAXPEA5PMG");
-	clientIDs.put("amsterdam",    "EEUJP005ZF2G4KP4LLDNPYW2E5XDOMNHSPK0HQPPPWQ0IZ2M");
-	clientIDs.put("goldcoast",    "WE0BEXSL5FUEREONSMCFMDS4KZOIMYCK4OEX4XEJMDIVP2DW");
-	clientIDs.put("glasgow",      "QQG25WOEZU0R4MEGXWSLSJQJC5UI5Y4Y5YHSPN3RGLM3ULEN");
-	clientIDs.put("sanfrancisco", "XYU1LNUBITLCECATB0AQYYPOLPOR42GIB5GT4J2RLJKI4ISE");
-	clientIDs.put("santander", 	  "JEENTEUTSB4TDWNIEZOKVM4CAK5FIZN50F4XPDAGLVD3E0CS");
-	clientIDs.put("pool",         "G4BW1FHVMXPPJ3NE1IDJIZZOWQFN5IDFTEOTQQGY1KM141EP");
-	
-	clientSecrets.put("london",   	  "LQOMTTL5G4LERJMOT0GGSK2OVKRAQI4FMKJNREEIYFUET4ND");
-	clientSecrets.put("london2", 	  "LQOMTTL5G4LERJMOT0GGSK2OVKRAQI4FMKJNREEIYFUET4ND");
-	clientSecrets.put("amsterdam", 	  "EJJIS0I3JZEY10ZOBQX4YAXTYSZDW5DMCTCQP1SWUK13INPL");
-	clientSecrets.put("goldcoast", 	  "M5UXKCTZLE0BNFA0UAIEANOZBJKGSFQ1BNKMJMMT5TOQXGVV");
-	clientSecrets.put("glasgow", 	  "1KNA5ELWCZCBUG3N1IDCYVOLWSGPIUOYY3H4HZUADE4BJPSL");
-	clientSecrets.put("sanfrancisco", "5VACF55Z1UXFTZYWREQRRVPH0RHALSUJXIIIJPGYPEXVY41I");
-	clientSecrets.put("santander", 	  "YT22241LGKVVNNF4LZWG2RCKXOCEQSAGNR533GZPC2QOTRBN");
-	clientSecrets.put("pool",		  "IZR0DVP5CZ2JGBBLHRGRGXCQ1S1ZNNCAXORPUJZ4HTLOPE11");
-  }
+//  /**
+//   * Map of cities and their associated time zones.
+//   */
+//  private static final Map<String,String> timeZones ;
+//  static {
+//	timeZones = new HashMap<String,String>();
+//	timeZones.put("london",       "Europe/London");
+//	timeZones.put("london2",      "Europe/London");
+//	timeZones.put("glasgow",      "Europe/London");
+//	timeZones.put("amsterdam",    "Europe/Amsterdam");
+//	timeZones.put("goldcoast", 	  "Australia/Queensland");
+//	timeZones.put("sanfrancisco", "America/Los_Angeles");
+//	timeZones.put("santander",    "Europe/Madrid");
+//  }
+//  
+//  /**
+//   * Maps of cities and their associated Foursquare API credentials.
+//   */
+//  private static final Map<String,String> clientIDs ;
+//  private static final Map<String,String> clientSecrets ;
+//  static {
+//	clientIDs = new HashMap<String,String>();
+//	clientSecrets = new HashMap<String,String>();
+//	
+//	clientIDs.put("london",       "SUIULPYP4BQ1J0EAZ3KUHSDRP1VYWNJEVVT4R0TAXPEA5PMG");
+//	clientIDs.put("london2",      "SUIULPYP4BQ1J0EAZ3KUHSDRP1VYWNJEVVT4R0TAXPEA5PMG");
+//	clientIDs.put("amsterdam",    "EEUJP005ZF2G4KP4LLDNPYW2E5XDOMNHSPK0HQPPPWQ0IZ2M");
+//	clientIDs.put("goldcoast",    "WE0BEXSL5FUEREONSMCFMDS4KZOIMYCK4OEX4XEJMDIVP2DW");
+//	clientIDs.put("glasgow",      "QQG25WOEZU0R4MEGXWSLSJQJC5UI5Y4Y5YHSPN3RGLM3ULEN");
+//	clientIDs.put("sanfrancisco", "XYU1LNUBITLCECATB0AQYYPOLPOR42GIB5GT4J2RLJKI4ISE");
+//	clientIDs.put("santander", 	  "JEENTEUTSB4TDWNIEZOKVM4CAK5FIZN50F4XPDAGLVD3E0CS");
+//	clientIDs.put("pool",         "G4BW1FHVMXPPJ3NE1IDJIZZOWQFN5IDFTEOTQQGY1KM141EP");
+//	
+//	clientSecrets.put("london",   	  "LQOMTTL5G4LERJMOT0GGSK2OVKRAQI4FMKJNREEIYFUET4ND");
+//	clientSecrets.put("london2", 	  "LQOMTTL5G4LERJMOT0GGSK2OVKRAQI4FMKJNREEIYFUET4ND");
+//	clientSecrets.put("amsterdam", 	  "EJJIS0I3JZEY10ZOBQX4YAXTYSZDW5DMCTCQP1SWUK13INPL");
+//	clientSecrets.put("goldcoast", 	  "M5UXKCTZLE0BNFA0UAIEANOZBJKGSFQ1BNKMJMMT5TOQXGVV");
+//	clientSecrets.put("glasgow", 	  "1KNA5ELWCZCBUG3N1IDCYVOLWSGPIUOYY3H4HZUADE4BJPSL");
+//	clientSecrets.put("sanfrancisco", "5VACF55Z1UXFTZYWREQRRVPH0RHALSUJXIIIJPGYPEXVY41I");
+//	clientSecrets.put("santander", 	  "YT22241LGKVVNNF4LZWG2RCKXOCEQSAGNR533GZPC2QOTRBN");
+//	clientSecrets.put("pool",		  "IZR0DVP5CZ2JGBBLHRGRGXCQ1S1ZNNCAXORPUJZ4HTLOPE11");
+//  }
   
   
   
@@ -300,8 +300,10 @@ public class AttendanceCrawler {
   
   public static String getFoursquareVenueById(String venue_id, String city) throws Exception {
 	String ret_val = null;
+	
 	try {
-	  ret_val = getFoursquareVenueById(venue_id, clientIDs.get(city), clientSecrets.get(city));
+	  Map<String,String> credentials = getCityCredentials(city);
+	  ret_val = getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
 	}
 	catch(Exception e) {
 	  /*
@@ -310,8 +312,9 @@ public class AttendanceCrawler {
 		String       randomCity = keys.get( random.nextInt(keys.size()) );
 	   */
 	  String randomCity = "goldcoast";
+	  Map<String,String> credentials = getCityCredentials(randomCity);
 
-	  ret_val = getFoursquareVenueById(venue_id, clientIDs.get(randomCity), clientSecrets.get(randomCity));
+	  ret_val = getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
 	}
 	return ret_val;
   }
@@ -379,7 +382,7 @@ public class AttendanceCrawler {
 	  // Important: the program must not be interrupted for more than one
 	  // hour, or we will lose time series data.
 	  for(String venue_id: city_venues.get(c)){
-		String ts_file = folder + c + File.separator + "attendances_crawl" + File.separator +venue_id+".ts";
+		String ts_file = folder + c + File.separator + "attendances_crawl" + File.separator + venue_id + ".ts";
 		
 		if(new File(ts_file).exists()) {
 		  BufferedReader buffer = new BufferedReader(new FileReader(ts_file));
@@ -420,8 +423,9 @@ public class AttendanceCrawler {
 		  // We get the current time according to the city's time zone
 		  Calendar cal = Calendar.getInstance();
 		  cal.add(Calendar.MILLISECOND, 
-			  	  TimeZone.getTimeZone(timeZones.get(c)).getOffset(cal.getTime().getTime()) - 
-			  	  TimeZone.getTimeZone("Europe/London").getOffset(cal.getTime().getTime()));
+			  	  TimeZone.getTimeZone(getCityTimezone(c)).getOffset(cal.getTime().getTime()) -
+			  	  Calendar.getInstance().getTimeZone().getOffset(cal.getTime().getTime()));
+			  	  //TimeZone.getTimeZone("Europe/London").getOffset(cal.getTime().getTime()));
 		  
 		  long current_time = DateUtils.truncate(cal.getTime(), Calendar.HOUR).getTime();
 		  		  
@@ -441,20 +445,21 @@ public class AttendanceCrawler {
 			// for this venue. We get the number of people "here now" to initialize
 			// the series.
 			if(venue_last_call.get(venue_id) == null) {
-			  // TODO: by doing this, we keep a representation of the venue dating from the beginning
-			  // 	   of the specific crawl. we might want to change this and update this file once
-			  //	   in a while.
-			  //FileWriter info = new FileWriter("/local/tr.smart/foursquare/"+c+"_specific_crawl/"+venue_id+".info");
-			  //info.write(venue.getFoursquareJson());
-			  //info.close();
+			  /** TODO: by doing this, we keep a representation of the venue dating from the beginning
+			   * 	   of the specific crawl. we might want to change this and update this file once
+			   *	   in a while.
+			   */
+			  FileWriter info = new FileWriter(folder + c + File.separator + "foursquare_venues" + File.separator + venue_id + ".info");
+			  info.write(venue.getFoursquareJson());
+			  info.close();
 
-			  FileWriter out  = new FileWriter("/local/tr.smart/foursquare/"+c+"_specific_crawl/"+venue_id+".ts");
+			  FileWriter out  = new FileWriter(folder + c + File.separator + "attendances_crawl" + File.separator + venue_id + ".ts");
 			  out.write("Date,here_now,hour_checkins,total_checkins\n");
 			  out.write(df.format(current_time)+","+venue.getHereNow()+","+venue.getHereNow()+","+venue.getCheckincount()+"\n");
 			  out.close();
 			}
 			else {
-			  FileWriter out  = new FileWriter("/local/tr.smart/foursquare/"+c+"_specific_crawl/"+venue_id+".ts",true);
+			  FileWriter out  = new FileWriter(folder + c + File.separator + "attendances_crawl" + File.separator + venue_id + ".ts", true);
 			  int checks = venue.getCheckincount()-venue_last_checkin.get(venue_id);
 			  out.write(df.format(current_time)+","+venue.getHereNow()+","+Integer.toString(checks)+","+venue.getCheckincount()+"\n");
 			  out.close();
@@ -480,7 +485,7 @@ public class AttendanceCrawler {
 			
 			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getMessage()+")");
 			
-			if(e.getMessage().equals("400"))
+			if(e.getMessage().equals("400") || e.getMessage().equals("403") || e.getMessage().equals("500") || e.getMessage().equals("504") || e.getMessage().equals("502"))
 			  city_venues_buffer.add(venue_id);
 			
 			continue;
@@ -492,7 +497,7 @@ public class AttendanceCrawler {
 		// is something to repair).
 		Calendar cal = Calendar.getInstance();
 		if(city_venues_buffer.peekFirst() == null && (cal.getTimeInMillis()-sanity_checks.get(c)) >= 86400000 && cal.get(Calendar.HOUR_OF_DAY) < 2 ) {
-		  VenueUtil.fixBrokenTimeSeriesCity(c, "/local/tr.smart/foursquare");
+		  VenueUtil.fixBrokenTimeSeriesCity(c, folder);
 		  sanity_checks.put(c,cal.getTimeInMillis());
 		  info_logs.get(c).write("["+df.format(cal.getTime())+"] Sanity check OK.\n");
 		  info_logs.get(c).flush();

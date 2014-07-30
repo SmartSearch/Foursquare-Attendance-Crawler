@@ -49,7 +49,7 @@ public class VenueUtil {
   }
   
   public static ArrayList<File> getAllVenueFilesEndingWith(String folder, String city, final String extension) {
-	return getAllFilesEndingWith(folder+"/"+city+"_attendance_crawl", extension);
+	return getAllFilesEndingWith(folder + city + File.separator + "attendances_crawl", extension);
   }
   
   
