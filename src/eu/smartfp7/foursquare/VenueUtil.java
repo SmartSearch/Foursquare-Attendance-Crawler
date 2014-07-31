@@ -89,7 +89,7 @@ public class VenueUtil {
   }
   
   public static void generateInvertedGeohashFile(String city, String folder, int precision) throws IOException {
-	FileWriter inverted_file = new FileWriter(folder+"/"+city+".geohash."+precision);
+	FileWriter inverted_file = new FileWriter(folder+ city + ".geohash." + precision);
 	
 	for(File file: getAllVenueFilesEndingWith(folder, city, ".info")) {
 	  BufferedReader info = new BufferedReader(new FileReader(file));
