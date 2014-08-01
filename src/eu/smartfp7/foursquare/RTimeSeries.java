@@ -1,3 +1,18 @@
+/**  
+ * SMART FP7 - Search engine for MultimediA enviRonment generated contenT
+ * Webpage: http://smartfp7.eu
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
+ * The Original Code is Copyright (c) 2012-2014 the University of Glasgow
+ * All Rights Reserved
+ * 
+ * Contributor(s):
+ *  @author Romain Deveaud <romain.deveaud at glasgow.ac.uk>
+ */
+
 package eu.smartfp7.foursquare;
 
 import java.io.BufferedReader;
@@ -18,18 +33,11 @@ import java.util.Map;
 
 
 /**
- * [Copyright and License]
- */
-
-/**
  * This class represents time series constructed from the files
  * produced by the SpecificVenueCrawler. The R prefix stands for the
  * R data analysis software, because input files are in CSV format (which
  * is convenient when working with R). Or maybe it is because Romain
  * coded this class. Or maybe both.
- * 
- * 
- * @author Romain Deveaud <romain.deveaud at glasgow.ac.uk>
  *
  */
 public class RTimeSeries {
@@ -113,25 +121,6 @@ public class RTimeSeries {
   public Collection<Date> idealDates() {
 	Date first_date = this.dates.get(0);
 	Date last_date  = this.dates.get(this.dates.size()-1);
-	
-//	Calendar c = Calendar.getInstance();
-//	
-//	DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//	
-//	c.setTime(last_date);
-//	if((c.get(Calendar.YEAR) - 200000) == 2014 || (c.get(Calendar.YEAR) - 200000) == 2015 || (c.get(Calendar.YEAR) - 200000) == 2013)
-//	  c.add(Calendar.YEAR, -200000);
-//	
-//	last_date = c.getTime();
-//	
-//	c.setTime(first_date);
-//	if((c.get(Calendar.YEAR) - 200000) == 2014 || (c.get(Calendar.YEAR) - 200000) == 2015 || (c.get(Calendar.YEAR) - 200000) == 2013)
-//	  c.add(Calendar.YEAR, -200000);
-//	
-//	first_date = c.getTime();
-	
-	//System.out.println(df.format(first_date));
-	//System.out.println(df.format(last_date));
 	
 	ArrayList<Date> ideal_dates = new ArrayList<Date>();
 	
