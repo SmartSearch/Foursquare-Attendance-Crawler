@@ -177,24 +177,8 @@ public class AttendanceCrawler {
   }
   
   public static String getFoursquareVenueById(String venue_id, String city) throws Exception {
-	String ret_val = null;
-	
-	try {
-	  Map<String,String> credentials = Settings.getInstance().getCityCredentials(city);
-	  ret_val = getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
-	}
-	catch(Exception e) {
-	  /*
-		Random       random     = new Random();
-		List<String> keys       = new ArrayList<String>(clientIDs.keySet());
-		String       randomCity = keys.get( random.nextInt(keys.size()) );
-	   */
-	  String randomCity = "goldcoast";
-	  Map<String,String> credentials = Settings.getInstance().getCityCredentials(randomCity);
-
-	  ret_val = getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
-	}
-	return ret_val;
+	Map<String,String> credentials = Settings.getInstance().getCityCredentials(city);
+	 return getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
   }
   
   
