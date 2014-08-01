@@ -1,3 +1,19 @@
+/**  
+ * SMART FP7 - Search engine for MultimediA enviRonment generated contenT
+ * Webpage: http://smartfp7.eu
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
+ * The Original Code is Copyright (c) 2012-2014 the University of Glasgow
+ * All Rights Reserved
+ * 
+ * Contributor(s):
+ *  @author M-Dyaa Albakour <dyaa.albakour at glasgow.ac.uk>
+ *  @author Romain Deveaud <romain.deveaud at glasgow.ac.uk>
+ */
+
 package eu.smartfp7.foursquare;
 
 import java.text.DateFormat;
@@ -7,12 +23,9 @@ import java.util.Calendar;
 
 /**
  * An item in a list of time series data.
- *  
- * @author Dyaa Albakour
  *
  */
 public class  TimeSeriesItem<T>{
-
 	long   timeInMilis;
 	Double prob;
 	String dateString;

@@ -178,7 +178,7 @@ public class AttendanceCrawler {
   
   public static String getFoursquareVenueById(String venue_id, String city) throws Exception {
 	Map<String,String> credentials = Settings.getInstance().getCityCredentials(city);
-	 return getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
+	return getFoursquareVenueById(venue_id, credentials.get("client_id"), credentials.get("client_secret"));
   }
   
   
