@@ -1,0 +1,12 @@
+{
+	"foursquare_api_accounts" : {
+		"london": { "client_id": "<FOURSQUARE_API_CLIENT_ID>", "client_secret": "<FOURSQUARE_API_CLIENT_SECRET>" }
+	},
+	"timezones" : {
+		"london": "Europe/London"
+	},
+	"centers" : {
+		"london": {  "lat": 51.5116, "lng": -0.115535 },
+	},
+	"crawl_folder": "/path/to/your/folder"
+}
