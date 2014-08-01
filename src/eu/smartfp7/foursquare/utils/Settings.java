@@ -65,9 +65,8 @@ public class Settings {
   }
 
   /**
-   * Check if all the files and directories needed by the crawler already
-   * exist, create them otherwise.
-   * 
+   * Checks if all the files and directories needed by the crawler already
+   * exist, creates them otherwise.
    */
   public void checkFileHierarchy(String city) {
 	String folder = getFolder();
@@ -76,7 +75,8 @@ public class Settings {
 		folder + city , 
 		folder + city + File.separator + "attendances_crawl", 
 		folder + city + File.separator + "log",
-		folder + city + File.separator + "foursquare_venues" 
+		folder + city + File.separator + "foursquare_venues",
+		folder + city + File.separator + ".exhaustive_crawl"
 	};
 
 	for(String dir: dirs_to_check) {
@@ -86,7 +86,7 @@ public class Settings {
 	}
   }
 
-  /** Return the folder where all the data will be downloaded. */
+  /** Returns the folder where all the data will be downloaded. */
   public String getFolder() {	  
 	String path = this.settings_json.get("crawl_folder").getAsString(); 
 	if(path.charAt(path.length()-1) != File.separatorChar)
@@ -95,7 +95,7 @@ public class Settings {
 	return path;
   }
 
-  /** Return the Foursquare API credentials for a given city. */
+  /** Returns the Foursquare API credentials for a given city. */
   public Map<String,String> getCityCredentials(String city) {
 	Map<String,String> credentials = new HashMap<String,String>();
 
@@ -106,9 +106,19 @@ public class Settings {
 	return credentials;
   }
 
-  /** Return the timezone of a given city. */
+  /** Returns the timezone of a given city. */
   public String getCityTimezone(String city) {
 	return this.settings_json.get("timezones").getAsJsonObject().get(city).getAsString();
+  }
+  
+  /** Returns the longitude of the geographical center of a given city. */
+  public Double getCityCenterLng(String city) {
+	return this.settings_json.get("centers").getAsJsonObject().get(city).getAsJsonObject().get("lng").getAsDouble();
+  }
+  
+  /** Returns the latitude of the geographical center of a given city. */
+  public Double getCityCenterLat(String city) {
+	return this.settings_json.get("centers").getAsJsonObject().get(city).getAsJsonObject().get("lat").getAsDouble();
   }
 
 }

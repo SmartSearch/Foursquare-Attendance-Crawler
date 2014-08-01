@@ -48,7 +48,6 @@ import com.google.gson.JsonParser;
 import eu.smartfp7.foursquare.utils.Settings;
 
 
-
 /**
  * This class contains methods for crawling the hourly activity of pre-identified
  * trending venues.
@@ -114,10 +113,9 @@ public class AttendanceCrawler {
 	int rc;
 	String url="";
 	
-	String vParam;
-	Calendar cal = Calendar.getInstance();
-	SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
-	vParam = fmt.format(cal.getTime());
+	/** This parameter represents the date of the Foursquare API version that we use. 
+	 *  If you want to modify the source code, please see https://developer.foursquare.com/overview/versioning */
+	String vParam = "20140801";
 	
 	try {
 		url = "https://api.foursquare.com/v2/venues/"+URLEncoder.encode(venue_id,"UTF-8")
