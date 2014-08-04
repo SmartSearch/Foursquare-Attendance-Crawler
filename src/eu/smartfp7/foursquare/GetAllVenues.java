@@ -16,7 +16,9 @@
 
 package eu.smartfp7.foursquare;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +28,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -176,8 +180,22 @@ public class GetAllVenues {
 	// Creating the grid of points around the center of the city.
 	double[][][] grid = createGridAround(point,m);
 	
+	Collection<String> venue_ids = new ArrayList<String>();
+	String ids_file = Settings.getInstance().getFolder()+ city + File.separator + ".exhaustive_crawl" + File.separator + "venues.ids";
+	
+	// We get the ids of the venues that have already been crawled,
+	// in order to avoid storing them again.
+	if(new File(ids_file).exists()) {
+	  BufferedReader city_file = new BufferedReader(new FileReader(ids_file));
+	  String line = null;
+	  while ((line = city_file.readLine()) != null)
+		venue_ids.add(line);
+	  city_file.close();
+	}
+	
 	// Opening the file where the results of the crawl will be written.
 	FileWriter rawVenuesWriter = new FileWriter(folder + city + File.separator + ".exhaustive_crawl" + File.separator + "venues.json",true);
+	FileWriter venueIdsWriter  = new FileWriter(ids_file,true);
 
 	// Iterating over all the points of the grid.
 	for(int x = 0 ; x <grid.length ; ++x){
@@ -208,7 +226,7 @@ public class GetAllVenues {
 		 //Since we want popular venues, we heuristically filter venues that have
 		 // less than 25 overall checkins.
 		Venue v = new Venue(venuesArr.get(i).toString());
-		if(v.getCheckincount() < 25)
+		if(v.getCheckincount() < 25 || venue_ids.contains(v.getId()))
 		  continue;
 
 		// Write to the output file.
@@ -222,6 +240,7 @@ public class GetAllVenues {
 	  }
 	}
 	
+	venueIdsWriter.close();
 	rawVenuesWriter.close();
   }
 
