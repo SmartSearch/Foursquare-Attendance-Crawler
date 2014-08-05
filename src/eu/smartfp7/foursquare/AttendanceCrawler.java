@@ -141,9 +141,6 @@ public class AttendanceCrawler {
 	  // send the request, and read the HTTP response headers.
 	  // The headers are stored until requested.
 	  rc = c.getResponseCode();
-	  if (rc != HttpsURLConnection.HTTP_OK) {
-		throw new Exception(Integer.toString(rc));
-	  }
 
 	  is = c.getInputStream();
 
@@ -163,6 +160,10 @@ public class AttendanceCrawler {
 	  catch(com.google.gson.JsonSyntaxException e) {
 		System.out.println("Skipped malformed line in the Foursquare crawl.");
 		throw e;
+	  }
+	  
+	  if (rc != HttpsURLConnection.HTTP_OK) {
+		throw new FoursquareAPIException(out.toString());
 	  }
 	  	  
 	  return parsed_line.getAsJsonObject().get("response").getAsJsonObject().get("venue").toString();
@@ -339,16 +340,16 @@ public class AttendanceCrawler {
 			venue_last_checkin.put(venue_id,venue.getCheckincount());
 			
 			time_spent_on_API += System.currentTimeMillis()-beforeCall;
-		  } catch(Exception e) {
+		  } catch(FoursquareAPIException e) {
 			// If something bad happens (crawler not available, IO error, ...), we put the
 			// venue_id in the FIFO queue so that it gets reevaluated later.
 			//e.printStackTrace();
-			error_logs.get(c).write("["+df.format(cal.getTime().getTime())+"] Venue "+venue_id+" error with HTTP code "+e.getMessage()+". "+APICallsCount.get(current_time)+" API calls so far this hour, "+city_venues_buffer.size()+" venues remaining in the buffer.\n");
+			error_logs.get(c).write("["+df.format(cal.getTime().getTime())+"] Venue "+venue_id+" error with HTTP code "+e.getHttp_code()+". "+APICallsCount.get(current_time)+" API calls so far this hour, "+city_venues_buffer.size()+" venues remaining in the buffer.\n");
 			error_logs.get(c).flush();
 			
-			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getMessage()+")");
+			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getHttp_code()+")");
 			
-			if(e.getMessage().equals("400") || e.getMessage().equals("403") || e.getMessage().equals("500") || e.getMessage().equals("504") || e.getMessage().equals("502"))
+			if(e.getHttp_code().equals("400") || e.getHttp_code().equals("403") || e.getHttp_code().equals("500") || e.getHttp_code().equals("504") || e.getHttp_code().equals("502"))
 			  city_venues_buffer.add(venue_id);
 			
 			continue;
