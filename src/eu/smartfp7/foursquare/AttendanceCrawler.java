@@ -402,20 +402,21 @@ public class AttendanceCrawler {
 			venue_last_checkin.put(venue_id,venue.getCheckincount());
 			
 			time_spent_on_API += System.currentTimeMillis()-beforeCall;
-		  } catch(FoursquareAPIException e) {
+		  } catch(Exception e) {
 			// If something bad happens (crawler not available, IO error, ...), we put the
 			// venue_id in the FIFO queue so that it gets reevaluated later.
 			//e.printStackTrace();
-			error_logs.get(c).write("["+df.format(cal.getTime().getTime())+"] Venue "+venue_id+" error with HTTP code "+e.getHttp_code()+". "+APICallsCount.get(current_time)+" API calls so far this hour, "+city_venues_buffer.size()+" venues remaining in the buffer.\n");
+			error_logs.get(c).write("["+df.format(cal.getTime().getTime())+"] Error with venue "+venue_id+" ("+e.getMessage()+"). "+APICallsCount.get(current_time)+" API calls so far this hour, "+city_venues_buffer.size()+" venues remaining in the buffer.\n");
 			error_logs.get(c).flush();
+
+			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getMessage()+")");
 			
-			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getHttp_code()+")");
-			
-			if(e.getHttp_code().equals("400") && e.getError_detail().equals("Venue "+venue_id+" has been deleted")) {
-			  city_venues.get(c).remove(venue_id);
-			  removeVenue(venue_id,c);
-			}
-			else if(e.getHttp_code().equals("403") || e.getHttp_code().equals("500") || e.getHttp_code().equals("504") || e.getHttp_code().equals("502"))
+			if(e instanceof FoursquareAPIException)
+			  if(((FoursquareAPIException) e).getHttp_code().equals("400") && ((FoursquareAPIException) e).getError_detail().equals("Venue "+venue_id+" has been deleted")) {
+				city_venues.get(c).remove(venue_id);
+				removeVenue(venue_id,c);
+			  }
+			else
 			  city_venues_buffer.add(venue_id);
 			
 			continue;
