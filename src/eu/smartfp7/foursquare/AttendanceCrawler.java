@@ -16,6 +16,7 @@
 package eu.smartfp7.foursquare;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -58,7 +59,6 @@ public class AttendanceCrawler {
   
   /**
    * This function loads the Foursquare IDs of the venues for a given city.
-   * TODO: See gist to find the 5000 most popular venues in a city.
    * 
    * @param A city.
    * @return A list of String representing the IDs of the training venues
@@ -78,6 +78,68 @@ public class AttendanceCrawler {
 	city_file.close();
 	
 	return venues;
+  }
+  
+  /**
+   * From GitHub issue: https://github.com/SmartSearch/Foursquare-Attendance-Crawler/issues/3
+   * 
+   * Venues can be deleted by/on Foursquare, resulting in errors when the crawler 
+   * attempts to retrieve the hourly attendance. It also has bad consequences: the 
+   * crawler tries to obtain the attendance over and over, draining the number of 
+   * API calls, which also impacts the crawling of other venues and can lead to 
+   * missing obervations.
+   * 
+   * This function removes a venue from the different files, so that it won't be
+   * considered by the crawler anymore.
+   */
+  public static void removeVenue(String venue_id, String city) {
+	/**
+	 * First part: we need to remove `venue_id` from the ids file. We use a temporary
+	 * file to do this.
+	 */
+	String ids_file     = Settings.getInstance().getFolder()+ city + File.separator + "venues.ids";
+	String tmp_ids_file = Settings.getInstance().getFolder()+ city + File.separator + "venues.ids.tmp";
+
+	try {
+	  BufferedReader reader = new BufferedReader(new FileReader(ids_file));
+	  BufferedWriter writer = new BufferedWriter(new FileWriter(tmp_ids_file));
+	  
+	  String line = null;
+	  
+	  while((line = reader.readLine()) != null) {
+		// Skipping `venue_id` when rewriting the file.
+		String trimmedLine = line.trim();
+		if(trimmedLine.equals(venue_id)) continue;
+		
+		writer.write(line+"\n");
+	  }
+	  
+	  reader.close();
+	  writer.close();
+	} catch (IOException e) {
+	  e.printStackTrace();
+	}
+	
+	// When we have finished rewriting, we rename the temporary file so that it
+	// becomes the real one.
+	new File(tmp_ids_file).renameTo(new File(ids_file));
+	
+	/** End of first part. */
+	
+	/**
+	 * Second part: we need to delete the files related to the venue that have
+	 * been created while crawling (i.e. .ts and .info).
+	 * Instead, we move them into a .deleted folder that can allow us to recover
+	 * from hypothetical errors.
+	 */
+	
+	new File(Settings.getInstance().getFolder() + city + File.separator + "attendances_crawl" + File.separator + venue_id + ".ts").renameTo(
+	new File(Settings.getInstance().getFolder() + city + File.separator + ".deleted"          + File.separator + venue_id + ".ts"));
+	
+	new File(Settings.getInstance().getFolder() + city + File.separator + "foursquare_venues" + File.separator + venue_id + ".info").renameTo(
+	new File(Settings.getInstance().getFolder() + city + File.separator + ".deleted"          + File.separator + venue_id + ".info"));
+	
+	/** End of second part. */
   }
   
   
@@ -141,9 +203,6 @@ public class AttendanceCrawler {
 	  // send the request, and read the HTTP response headers.
 	  // The headers are stored until requested.
 	  rc = c.getResponseCode();
-	  if (rc != HttpsURLConnection.HTTP_OK) {
-		throw new Exception(Integer.toString(rc));
-	  }
 
 	  is = c.getInputStream();
 
@@ -163,6 +222,10 @@ public class AttendanceCrawler {
 	  catch(com.google.gson.JsonSyntaxException e) {
 		System.out.println("Skipped malformed line in the Foursquare crawl.");
 		throw e;
+	  }
+	  
+	  if (rc != HttpsURLConnection.HTTP_OK) {
+		throw new FoursquareAPIException(out.toString());
 	  }
 	  	  
 	  return parsed_line.getAsJsonObject().get("response").getAsJsonObject().get("venue").toString();
@@ -339,16 +402,20 @@ public class AttendanceCrawler {
 			venue_last_checkin.put(venue_id,venue.getCheckincount());
 			
 			time_spent_on_API += System.currentTimeMillis()-beforeCall;
-		  } catch(Exception e) {
+		  } catch(FoursquareAPIException e) {
 			// If something bad happens (crawler not available, IO error, ...), we put the
 			// venue_id in the FIFO queue so that it gets reevaluated later.
 			//e.printStackTrace();
-			error_logs.get(c).write("["+df.format(cal.getTime().getTime())+"] Venue "+venue_id+" error with HTTP code "+e.getMessage()+". "+APICallsCount.get(current_time)+" API calls so far this hour, "+city_venues_buffer.size()+" venues remaining in the buffer.\n");
+			error_logs.get(c).write("["+df.format(cal.getTime().getTime())+"] Venue "+venue_id+" error with HTTP code "+e.getHttp_code()+". "+APICallsCount.get(current_time)+" API calls so far this hour, "+city_venues_buffer.size()+" venues remaining in the buffer.\n");
 			error_logs.get(c).flush();
 			
-			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getMessage()+")");
+			System.out.println("["+df.format(cal.getTime().getTime())+"] "+c+" -- "+APICallsCount.get(current_time)+" API calls // "+city_venues_buffer.size()+" venues remaining "+" ("+e.getHttp_code()+")");
 			
-			if(e.getMessage().equals("400") || e.getMessage().equals("403") || e.getMessage().equals("500") || e.getMessage().equals("504") || e.getMessage().equals("502"))
+			if(e.getHttp_code().equals("400") && e.getError_detail().equals("Venue "+venue_id+" has been deleted")) {
+			  city_venues.get(c).remove(venue_id);
+			  removeVenue(venue_id,c);
+			}
+			else if(e.getHttp_code().equals("403") || e.getHttp_code().equals("500") || e.getHttp_code().equals("504") || e.getHttp_code().equals("502"))
 			  city_venues_buffer.add(venue_id);
 			
 			continue;

@@ -73,10 +73,11 @@ public class Settings {
 
 	String[] dirs_to_check = {  
 		folder + city , 
-		folder + city + File.separator + "attendances_crawl", 
+		folder + city + File.separator + "attendances_crawl",
 		folder + city + File.separator + "log",
 		folder + city + File.separator + "foursquare_venues",
-		folder + city + File.separator + ".exhaustive_crawl"
+		folder + city + File.separator + ".exhaustive_crawl",
+		folder + city + File.separator + ".deleted",
 	};
 
 	for(String dir: dirs_to_check) {
