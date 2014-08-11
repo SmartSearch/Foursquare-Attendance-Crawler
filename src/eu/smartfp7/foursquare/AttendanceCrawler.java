@@ -21,13 +21,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,14 +32,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import org.apache.commons.lang.time.DateUtils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import eu.smartfp7.foursquare.utils.Settings;
+import eu.smartfp7.foursquare.utils.Utils;
 
 
 /**
@@ -164,79 +156,26 @@ public class AttendanceCrawler {
   }
   
   /**
-   * Adapted from Dyaa's code; gets the JSON String containing all the
-   * information about a venue, given its ID.
-   * 
+   * Gets the JSON String containing all the information about a venue, given its ID.
    */
-  public static String getFoursquareVenueById(String venue_id, String id, String secret) throws Exception {
-	HttpsURLConnection c = null;
-	
-	InputStream is = null;
-	int rc;
-	String url="";
-	
+  public static String getFoursquareVenueById(String venue_id, String id, String secret) throws IOException, FoursquareAPIException {
 	/** This parameter represents the date of the Foursquare API version that we use. 
 	 *  If you want to modify the source code, please see https://developer.foursquare.com/overview/versioning */
 	String vParam = "20140801";
 	
-	try {
-		url = "https://api.foursquare.com/v2/venues/"+URLEncoder.encode(venue_id,"UTF-8")
-				+"?client_id="+ id +
-				"&client_secret=" + secret +
-				"&v="+vParam ;
+	String url = "https://api.foursquare.com/v2/venues/" + venue_id + "?client_id=" + id +
+				 "&client_secret=" + secret + "&v=" + vParam ;
 		
-	} catch (UnsupportedEncodingException e1) {
-		e1.printStackTrace();
-	}
+	String json_response = Utils.makeAPICall(url);
 	
-	final StringBuilder out = new StringBuilder();
-	try {
-	  c = (HttpsURLConnection) (new URL(url)).openConnection();
-
-	  c.setRequestMethod("GET");
-	  c.setDoOutput(true);
-	  c.setReadTimeout(20000);	             
-
-	  c.connect();
-
-	  // Getting the response code will open the connection,
-	  // send the request, and read the HTTP response headers.
-	  // The headers are stored until requested.
-	  rc = c.getResponseCode();
-
-	  is = c.getInputStream();
-
-	  final char[] buffer = new char[2048];
-
-	  final Reader in = new InputStreamReader(is, "UTF-8");
-	  for (;;) {
-		int rsz = in.read(buffer, 0, buffer.length);
-		if (rsz < 0)
-		  break;
-		out.append(buffer, 0, rsz);
-	  }
-	  JsonElement parsed_line;
-	  try {
-		parsed_line = new JsonParser().parse(out.toString());
-	  }
-	  catch(com.google.gson.JsonSyntaxException e) {
-		System.out.println("Skipped malformed line in the Foursquare crawl.");
-		throw e;
-	  }
+	JsonElement parsed_line = new JsonParser().parse(json_response);
+	
+	if(parsed_line.getAsJsonObject().get("response").toString().equals("{}")) {
+	  /** error */
+	  throw new FoursquareAPIException(json_response);
+	}  
 	  
-	  if (rc != HttpsURLConnection.HTTP_OK) {
-		throw new FoursquareAPIException(out.toString());
-	  }
-	  	  
-	  return parsed_line.getAsJsonObject().get("response").getAsJsonObject().get("venue").toString();
-
-	} catch (ClassCastException e) {
-	  throw new IllegalArgumentException("Not an HTTP URL");
-	} catch (MalformedURLException e) {
-	  throw e;
-	} catch (IOException e) {				
-	  throw e;
-	}
+	return parsed_line.getAsJsonObject().get("response").getAsJsonObject().get("venue").toString();
   }
   
   public static String getFoursquareVenueById(String venue_id, String city) throws Exception {
