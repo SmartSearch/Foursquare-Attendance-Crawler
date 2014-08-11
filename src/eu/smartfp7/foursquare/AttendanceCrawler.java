@@ -285,9 +285,6 @@ public class AttendanceCrawler {
 		Thread.sleep(3000);
 		
 		while((venue_id = city_venues_buffer.pollFirst()) != null) {
-		  if (!venue_id.equals("513b05f2e4b0242461ab2796"))
-			continue;
-		  
 		  // We get the current time according to the city's time zone
 		  Calendar cal = Calendar.getInstance();
 		  cal.add(Calendar.MILLISECOND, 
