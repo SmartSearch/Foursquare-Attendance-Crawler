@@ -61,5 +61,9 @@ public class FoursquareAPIException extends Exception {
   public JsonObject getResponse() {
     return response;
   }
+  
+  public String getMessage() {
+	return error_detail;
+  }
 
 }

@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -104,20 +105,22 @@ public class Utils {
 	HttpURLConnection conn =
 		(HttpURLConnection) url.openConnection();
 
-	if (conn.getResponseCode() != 200) {
-	  throw new IOException(conn.getResponseMessage());
-	}
+	InputStream _is;  
+	if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+	  _is = conn.getInputStream();  
+	else
+	  _is = conn.getErrorStream();   
 
 	// Buffer the result into a string
 	BufferedReader rd = new BufferedReader(
-		new InputStreamReader(conn.getInputStream()));
+		new InputStreamReader(_is));
 	StringBuilder sb = new StringBuilder();
 	String line;
 	while ((line = rd.readLine()) != null) {
 	  sb.append(line);
 	}
 	rd.close();
-
+	
 	conn.disconnect();
 	return sb.toString();
   }
