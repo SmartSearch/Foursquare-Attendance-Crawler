@@ -1,6 +1,32 @@
 FoursquareAttendanceCrawler
 =============================
 
+If you use this code for a research purpose, please use the following citation:
+
+Romain Deveaud, M-Dyaa Albakour, Craig Macdonald, and Iadh Ounis. *Experiments with a Venue-Centric Model for Personalised and Time-Aware Venue Suggestion.* In CIKM 2015, Shanghai, China. http://dl.acm.org/citation.cfm?id=2806484
+
+Bibtex:
+```
+@inproceedings{Deveaud:2015:EVM:2806416.2806484,
+ author = {Deveaud, Romain and Albakour, M-Dyaa and Macdonald, Craig and Ounis, Iadh},
+ title = {Experiments with a Venue-Centric Model for Personalisedand Time-Aware Venue Suggestion},
+ booktitle = {Proceedings of the 24th ACM International on Conference on Information and Knowledge Management},
+ series = {CIKM '15},
+ year = {2015},
+ isbn = {978-1-4503-3794-6},
+ location = {Melbourne, Australia},
+ pages = {53--62},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2806416.2806484},
+ doi = {10.1145/2806416.2806484},
+ acmid = {2806484},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {location-based social networks, personalisation, time series forecasting, venue recommendation},
+} 
+```
+
+
 ## Settings
 
 Open the `etc/settings-example.json` file and change the `foursquare_api_accounts` and `crawl_folder` properties. You can obtain credentials for the Foursquare API by creating an application at https://foursquare.com/developers/apps.
